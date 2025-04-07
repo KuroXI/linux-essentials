@@ -1,0 +1,35 @@
+name: Log Time Job
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  log_time:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run logging script
+        run: |
+          chmod +x ./activity6/log_time.sh
+          ./activity6/log_time.sh
+      
+      - name: Run counter script
+        run: |
+          chmod +x ./activity6/count_updates.sh
+          ./activity6/count_updates.sh
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .
+          git commit -m "Update log file with new timestamp" || echo "No changes to commit"
+          git push https://github-actions:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
